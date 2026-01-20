@@ -1,9 +1,12 @@
 """Conversion API router."""
 
+import io
+import zipfile
 from pathlib import Path
 from typing import List
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from pydantic import BaseModel
 
 from ..models import (
     ConverterType,
@@ -169,4 +172,69 @@ async def preview_result(job_id: str):
         "content": preview,
         "truncated": truncated,
         "total_length": len(content),
+    }
+
+
+class MultipleJobIds(BaseModel):
+    """Request body for multiple job operations."""
+    job_ids: List[str]
+
+
+@router.post("/download-multiple")
+async def download_multiple_results(request: MultipleJobIds):
+    """Download multiple converted files as a ZIP archive."""
+    if not request.job_ids:
+        raise HTTPException(status_code=400, detail="No job IDs provided")
+
+    # Create in-memory ZIP file
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for job_id in request.job_ids:
+            job = get_job(job_id)
+            if not job:
+                continue
+
+            if not job.output_file:
+                continue
+
+            output_path = Path(job.output_file)
+            if not output_path.exists():
+                continue
+
+            # Add file to ZIP with original name
+            filename = f"{job.file_info.name.rsplit('.', 1)[0]}.md"
+            zip_file.write(output_path, filename)
+
+    zip_buffer.seek(0)
+
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": "attachment; filename=tomd-export.zip"
+        }
+    )
+
+
+@router.post("/delete-multiple")
+async def delete_multiple_jobs(request: MultipleJobIds):
+    """Delete multiple conversion jobs."""
+    if not request.job_ids:
+        raise HTTPException(status_code=400, detail="No job IDs provided")
+
+    deleted = []
+    failed = []
+
+    for job_id in request.job_ids:
+        if delete_job(job_id):
+            deleted.append(job_id)
+        else:
+            failed.append(job_id)
+
+    return {
+        "deleted": deleted,
+        "failed": failed,
+        "deleted_count": len(deleted),
+        "failed_count": len(failed),
     }
