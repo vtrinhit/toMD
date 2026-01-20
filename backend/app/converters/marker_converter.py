@@ -4,19 +4,11 @@ import asyncio
 from pathlib import Path
 from typing import List
 
-# Check if marker is available
-try:
-    from marker.converters.pdf import PdfConverter
-    from marker.models import create_model_dict
-    from marker.output import text_from_rendered
-    MARKER_AVAILABLE = True
-except ImportError:
-    MARKER_AVAILABLE = False
+from marker.converters.pdf import PdfConverter
+from marker.models import create_model_dict
+from marker.output import text_from_rendered
 
 from .base import BaseConverter
-
-if not MARKER_AVAILABLE:
-    raise ImportError("marker-pdf is not installed")
 
 
 class MarkerConverter(BaseConverter):

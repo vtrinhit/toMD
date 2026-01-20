@@ -1,40 +1,45 @@
 """Converters package."""
 
-from typing import Dict, Type, Optional
+from typing import Dict, Type, Optional, List
 from pathlib import Path
+import logging
 
 from .base import BaseConverter
-from .markitdown_converter import MarkitdownConverter
-from .pypandoc_converter import PypandocConverter
-from .mammoth_converter import MammothConverter
-from .html2text_converter import Html2textConverter
 
-# Registry of all converters - start with core converters
-CONVERTERS: Dict[str, Type[BaseConverter]] = {
-    "markitdown": MarkitdownConverter,
-    "pypandoc": PypandocConverter,
-    "mammoth": MammothConverter,
-    "html2text": Html2textConverter,
-}
+logger = logging.getLogger(__name__)
 
-# Try to import optional converters
-try:
-    from .docling_converter import DoclingConverter
-    CONVERTERS["docling"] = DoclingConverter
-except ImportError:
-    pass
+# Registry of available converters
+CONVERTERS: Dict[str, Type[BaseConverter]] = {}
 
-try:
-    from .marker_converter import MarkerConverter
-    CONVERTERS["marker"] = MarkerConverter
-except ImportError:
-    pass
+# Track which converters are available
+AVAILABLE_CONVERTERS: List[str] = []
+UNAVAILABLE_CONVERTERS: Dict[str, str] = {}
 
-try:
-    from .unstructured_converter import UnstructuredConverter
-    CONVERTERS["unstructured"] = UnstructuredConverter
-except ImportError:
-    pass
+
+def _register_converter(name: str, module_name: str, class_name: str):
+    """Try to register a converter, handling import errors gracefully."""
+    try:
+        module = __import__(f"app.converters.{module_name}", fromlist=[class_name])
+        converter_class = getattr(module, class_name)
+        CONVERTERS[name] = converter_class
+        AVAILABLE_CONVERTERS.append(name)
+        logger.info(f"Loaded converter: {name}")
+    except ImportError as e:
+        UNAVAILABLE_CONVERTERS[name] = str(e)
+        logger.warning(f"Converter {name} not available: {e}")
+    except Exception as e:
+        UNAVAILABLE_CONVERTERS[name] = str(e)
+        logger.error(f"Error loading converter {name}: {e}")
+
+
+# Register all converters - order matters for priority
+_register_converter("markitdown", "markitdown_converter", "MarkitdownConverter")
+_register_converter("docling", "docling_converter", "DoclingConverter")
+_register_converter("marker", "marker_converter", "MarkerConverter")
+_register_converter("pypandoc", "pypandoc_converter", "PypandocConverter")
+_register_converter("unstructured", "unstructured_converter", "UnstructuredConverter")
+_register_converter("mammoth", "mammoth_converter", "MammothConverter")
+_register_converter("html2text", "html2text_converter", "Html2textConverter")
 
 
 def get_converter(
@@ -44,7 +49,11 @@ def get_converter(
 ) -> BaseConverter:
     """Get converter instance by type."""
     if converter_type not in CONVERTERS:
-        raise ValueError(f"Unknown converter type: {converter_type}")
+        available = ", ".join(AVAILABLE_CONVERTERS)
+        raise ValueError(
+            f"Converter '{converter_type}' not available. "
+            f"Available converters: {available}"
+        )
 
     return CONVERTERS[converter_type](api_key=api_key, base_url=base_url)
 
@@ -94,8 +103,8 @@ def get_best_converter_for_file(
     for audio_ext in audio_exts:
         priority[audio_ext] = ["markitdown"]
 
-    # Get priority list or default to markitdown
-    converter_priority = priority.get(ext, ["markitdown", "unstructured", "pypandoc"])
+    # Get priority list or default to available converters
+    converter_priority = priority.get(ext, AVAILABLE_CONVERTERS)
 
     for converter_name in converter_priority:
         if converter_name not in CONVERTERS:
@@ -107,8 +116,11 @@ def get_best_converter_for_file(
         except Exception:
             continue
 
-    # Fallback to markitdown
-    return get_converter("markitdown", api_key, base_url)
+    # Fallback to first available converter
+    if AVAILABLE_CONVERTERS:
+        return get_converter(AVAILABLE_CONVERTERS[0], api_key, base_url)
+
+    raise ValueError("No converters available")
 
 
 def get_all_converter_info() -> list:
@@ -122,14 +134,17 @@ def get_all_converter_info() -> list:
     ]
 
 
+def get_unavailable_converters() -> Dict[str, str]:
+    """Get dict of unavailable converters and their error messages."""
+    return UNAVAILABLE_CONVERTERS.copy()
+
+
 __all__ = [
     "BaseConverter",
-    "MarkitdownConverter",
-    "PypandocConverter",
-    "MammothConverter",
-    "Html2textConverter",
     "CONVERTERS",
+    "AVAILABLE_CONVERTERS",
     "get_converter",
     "get_best_converter_for_file",
     "get_all_converter_info",
+    "get_unavailable_converters",
 ]

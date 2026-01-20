@@ -4,17 +4,9 @@ import asyncio
 from pathlib import Path
 from typing import List
 
-# Check if docling is available
-try:
-    from docling.document_converter import DocumentConverter
-    DOCLING_AVAILABLE = True
-except ImportError:
-    DOCLING_AVAILABLE = False
+from docling.document_converter import DocumentConverter
 
 from .base import BaseConverter
-
-if not DOCLING_AVAILABLE:
-    raise ImportError("docling is not installed")
 
 
 class DoclingConverter(BaseConverter):

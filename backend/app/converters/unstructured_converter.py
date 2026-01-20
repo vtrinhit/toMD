@@ -4,17 +4,9 @@ import asyncio
 from pathlib import Path
 from typing import List
 
-# Check if unstructured is available
-try:
-    from unstructured.partition.auto import partition
-    UNSTRUCTURED_AVAILABLE = True
-except ImportError:
-    UNSTRUCTURED_AVAILABLE = False
+from unstructured.partition.auto import partition
 
 from .base import BaseConverter
-
-if not UNSTRUCTURED_AVAILABLE:
-    raise ImportError("unstructured is not installed")
 
 
 class UnstructuredConverter(BaseConverter):

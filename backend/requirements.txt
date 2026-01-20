@@ -1,37 +1,86 @@
-# FastAPI and server
+# ===========================================
+# FastAPI and Server
+# ===========================================
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 python-multipart>=0.0.9
 pydantic>=2.9.0
 pydantic-settings>=2.5.0
 
-# Async and concurrency
+# ===========================================
+# Async and Concurrency
+# ===========================================
 aiofiles>=24.1.0
 httpx>=0.27.0
 
-# Converters - Core (always available)
+# ===========================================
+# Converters - All Enabled
+# ===========================================
+
+# Microsoft Markitdown - Universal converter
 markitdown>=0.0.1a3
-mammoth>=1.8.0
-html2text>=2024.2.26
+
+# IBM Docling - Advanced document understanding
+docling>=2.5.0
+
+# Marker PDF - Best OCR for PDFs (requires torch)
+marker-pdf>=1.0.0
+
+# Pypandoc - Pandoc wrapper (requires Pandoc installed)
 pypandoc>=1.14
 
-# Converters - Optional (may require additional setup)
-# Uncomment if needed:
-# docling>=2.5.0          # IBM - requires additional deps
-# marker-pdf>=1.0.0       # PDF OCR - requires torch
-# unstructured>=0.15.0    # AI parsing - heavy deps
+# Unstructured - AI-powered document parsing
+unstructured>=0.15.0
+unstructured-inference>=0.7.0
 
-# PDF support
+# Mammoth - DOCX to HTML/Markdown
+mammoth>=1.8.0
+
+# HTML2Text - HTML to Markdown
+html2text>=2024.2.26
+
+# ===========================================
+# PDF Support
+# ===========================================
 pdfplumber>=0.11.0
+PyPDF2>=3.0.0
+pdf2image>=1.17.0
 
+# ===========================================
 # OpenAI for AI-powered features
+# ===========================================
 openai>=1.50.0
 
-# Utils
-python-magic>=0.4.27
-# python-magic-bin>=0.4.14  # Uncomment for Windows (instead of python-magic)
+# ===========================================
+# Image Processing
+# ===========================================
 pillow>=10.4.0
+pytesseract>=0.3.13
 
-# OCR support (optional - requires system deps)
-# pytesseract>=0.3.13
-# pdf2image>=1.17.0
+# ===========================================
+# Utils
+# ===========================================
+python-magic>=0.4.27; sys_platform != 'win32'
+python-magic-bin>=0.4.14; sys_platform == 'win32'
+
+# ===========================================
+# ML/AI Dependencies (for marker, docling)
+# ===========================================
+torch>=2.0.0
+torchvision>=0.15.0
+transformers>=4.30.0
+
+# ===========================================
+# Additional Dependencies
+# ===========================================
+numpy>=1.24.0
+scipy>=1.10.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+chardet>=5.0.0
+python-docx>=1.0.0
+openpyxl>=3.1.0
+python-pptx>=0.6.21
+ebooklib>=0.18
