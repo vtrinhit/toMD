@@ -44,7 +44,7 @@ function App() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 flex h-14 sm:h-16 items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
             <motion.div
@@ -181,7 +181,7 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t py-3 sm:py-4 mt-auto bg-muted/30">
+      <footer className="w-full border-t py-3 sm:py-4 mt-auto bg-muted/30">
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
