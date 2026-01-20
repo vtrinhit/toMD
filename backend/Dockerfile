@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Pandoc for document conversion
     pandoc \
     # OpenGL for some ML models
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     # PDF rendering
     ghostscript \
