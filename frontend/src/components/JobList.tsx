@@ -99,10 +99,6 @@ export function JobList() {
     setSelectedIds(new Set());
   };
 
-  const selectAllCompleted = () => {
-    setSelectedIds(new Set(completedJobs.map((j) => j.id)));
-  };
-
   const handleDownload = async (job: ConversionJob) => {
     try {
       const blob = await converterApi.downloadResult(job.id);
